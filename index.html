@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stress Analyzer</title>
+    <style>
+        body {
+            font-family: "Arial", sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 400px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: scale(1.02);
+        }
+
+        h2 {
+            color: #444;
+        }
+
+        input {
+            width: 90%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, #ff758c, #ff7eb3);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #ff4b8b, #ff6584);
+            transform: translateY(-2px);
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        .loading {
+            display: inline-block;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ff758c;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🔍 Stress Level Analyzer</h2>
+
+        <label for="humidity">🌡️ Humidity:</label>
+        <input type="number" id="humidity" step="0.01" placeholder="Enter Humidity">
+
+        <label for="temperature">🔥 Temperature:</label>
+        <input type="number" id="temperature" step="0.01" placeholder="Enter Temperature">
+
+        <label for="step_count">🚶 Step Count:</label>
+        <input type="number" id="step_count" placeholder="Enter Step Count">
+
+        <button onclick="predictStress()">Analyze Stress</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function predictStress() {
+            const humidity = document.getElementById("humidity").value;
+            const temperature = document.getElementById("temperature").value;
+            const step_count = document.getElementById("step_count").value;
+
+            if (!humidity || !temperature || !step_count) {
+                alert("⚠️ Please enter all values!");
+                return;
+            }
+
+            const data = { 
+                humidity: parseFloat(humidity), 
+                temperature: parseFloat(temperature), 
+                step_count: parseInt(step_count) 
+            };
+
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = '<div class="loading"></div>'; // Show loading effect
+
+            fetch("http://127.0.0.1:5000/predict", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                resultDiv.innerHTML = "🧠 Predicted Stress Level: <b>" + result.stress_level + "</b>";
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                resultDiv.innerHTML = "❌ Error in prediction!";
+            });
+        }
+    </script>
+</body>
+</html>
